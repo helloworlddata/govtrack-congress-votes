@@ -4,6 +4,12 @@ Converts votes JSON into a flat CSV
 from csv import DictWriter
 from pathlib import Path
 import json
+
+FETCHED_DIR = Path('wrangle', 'corral', 'fetched', 'congress')
+# SRC_DIR = FETCHED_DIR.joinpath('114', 'bills', 'hr')
+DEST_PATH = Path('wrangle', 'corral', 'compiled', 'votes.csv')
+DEST_PATH.parent.mkdir(exist_ok=True, parents=True)
+
 META_HEADERS = ['id', 'date']
 BILL_HEADERS = ['bill_' + h for h in ['congress', 'number', 'type']]
 RESULT_HEADERS = ['yes', 'no', 'present', 'not_voting']
@@ -12,10 +18,10 @@ VOTE_HEADERS = ['congress', 'category', 'chamber', 'number', 'question',
                 'subject', 'type', 'updated_at']
 ALL_HEADERS = META_HEADERS + RESULT_HEADERS + BILL_HEADERS + VOTE_HEADERS
 
-FETCHED_DIR = Path('wrangle', 'corral', 'fetched', 'congress')
-# SRC_DIR = FETCHED_DIR.joinpath('114', 'bills', 'hr')
-DEST_PATH = Path('wrangle', 'corral', 'compiled', 'votes.csv')
-DEST_PATH.parent.mkdir(exist_ok=True, parents=True)
+
+MIN_CONGRESSNUM = 101
+MAX_CONGRESSNUM = 114
+
 
 """
 todos:
@@ -57,7 +63,7 @@ if __name__ == '__main__':
     destcsv = DictWriter(destfile, fieldnames=ALL_HEADERS)
     destcsv.writeheader()
 
-    for congressnum in range(110, 114+1):
+    for congressnum in range(MIN_CONGRESSNUM, MAX_CONGRESSNUM+1):
         globpattern = str(Path(str(congressnum), 'votes', '*', '*', 'data.json'))
         for i, fpath in enumerate(FETCHED_DIR.glob(globpattern)):
             vdata = json.loads(fpath.read_text())

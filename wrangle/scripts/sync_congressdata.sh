@@ -1,8 +1,15 @@
-for cgnum in $(seq 110 114); do
+for cgnum in $(seq 101 114); do
 
-  echo "Collecting $cgnum"
-  echo "----------------------"
+  srcpath=govtrack.us::govtrackdata/congress/$cgnum/votes
+  destpath=./wrangle/corral/fetched/congress/$cgnum
+  echo "Syncing with:      $srcpath"
+  echo "Saving locally to: $destpath"
+  echo "------------------"
+  mkdir -p $destpath
   sleep 2
-  rsync -avz --delete --delete-excluded --exclude **/text-versions/ \
-        govtrack.us::govtrackdata/congress/$cgnum ./wrangle/corral/fetched/congress
+
+  rsync -avz --delete --delete-excluded \
+        --exclude **/text-versions/ \
+        $srcpath \
+        $destpath
 done
