@@ -1,4 +1,5 @@
-for cgnum in $(seq 101 114); do
+#!/usr/bin/env sh
+for cgnum in $(seq 98 114); do
 
   srcpath=govtrack.us::govtrackdata/congress/$cgnum/votes
   destpath=./wrangle/corral/fetched/congress/$cgnum
