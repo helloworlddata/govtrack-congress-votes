@@ -51,6 +51,14 @@ task :compile  => [:setup] do
   C_FILES.each_value{|fn| Rake::Task[fn].execute() }
 end
 
+desc "Publish everything"
+task :publish => [:setup] do
+  sh %Q{
+    csvstack wrangle/corral/compiled/congress/**/votes.csv > catalog/govtrack-congress-votes.csv
+}
+end
+
+
 # desc "Publish everything"
 # task :publish  => C_FILES.values() do
 #   C_FILES.each_value do |fn|
@@ -91,6 +99,7 @@ python #{SCRIPTS / 'collate_votes.py'} \
         cmd = %Q{
 python #{SCRIPTS / 'collate_member_votes.py'} \
     #{srcname} \
+    #{SCRIPTS / 'etc' / 'legislators.csv'} \
     > #{fname}
         }
 
