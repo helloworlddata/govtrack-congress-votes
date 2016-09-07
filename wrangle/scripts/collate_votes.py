@@ -2,13 +2,16 @@
 Converts votes JSON into a flat CSV
 """
 
-from settings import get_fetched_congress_numbers, glob_vote_files, \
-                      map_vote_value, extract_bill_meta, COLLATED_DIR
+from settings import map_vote_value, extract_bill_meta
 
+
+import argparse
 from csv import DictWriter
 import json
+from loggy import loggy
+from pathlib import Path
+from sys import stdout
 
-DEST_PATH = COLLATED_DIR / 'votes.csv'
 
 META_HEADERS = ['id', 'date']
 BILL_HEADERS = ['bill_id', 'bill_type']
@@ -21,6 +24,7 @@ ALL_HEADERS = META_HEADERS + BILL_HEADERS + RESULT_HEADERS \
               + VOTE_HEADERS + AMENDMENT_HEADERS
 
 
+LOGGY = loggy('collate_votes')
 
 
 def extract_votedata(vote):
@@ -56,22 +60,23 @@ def extract_votedata(vote):
     return row
 
 
-
 if __name__ == '__main__':
-    congress_numbers = get_fetched_congress_numbers()
-    print("Congress numbers found:", ', '.join(congress_numbers))
+    parser = argparse.ArgumentParser("Creates a simplified CSV of votes for the JSON in a given directory")
+    parser.add_argument('srcdir', type=str, help="directory of JSON to recursively parse for")
+    args = parser.parse_args()
+    srcdir = args.srcdir
+    # srcir is something like congress/100/votes
+    files = list(Path(srcdir).rglob('data.json')) # , '*', '*', 'data.json')
+    LOGGY.info('%s files in %s' % (len(files), srcdir))
+    votes = []
 
-    destfile = DEST_PATH.open('w')
-    destcsv = DictWriter(destfile, fieldnames=ALL_HEADERS)
-    destcsv.writeheader()
+    for fn in files:
+        d = json.loads(fn.read_text())
+        votes.append(extract_votedata(d))
 
-    for cnum in congress_numbers:
-        # e.g. ./114/votes/2015/h100/data.json
-        for i, fpath in enumerate(glob_vote_files(cnum)):
-            vdata = json.loads(fpath.read_text())
-            row = extract_votedata(vdata)
-            destcsv.writerow(row)
 
-        print("Congress {num}: {votecount} votes".format(num=cnum, votecount=i+1))
+    csvout = DictWriter(stdout, fieldnames=ALL_HEADERS)
+    csvout.writeheader()
+    for vote in sorted(votes, key=lambda x: int(x['number'])):
+        csvout.writerow(vote)
 
-    destfile.close()

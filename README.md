@@ -1,5 +1,15 @@
 # Congress votes as collected by Govtrack.us
 
+# Todo
+
+
+- Reconcile senate thomas data
+- Write bills (deferred)
+
+
+
+# Sources
+
 
 https://www.govtrack.us/blog/2009/11/18/aye-versus-yea-whats-the-difference/
 
